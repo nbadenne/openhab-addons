@@ -170,7 +170,6 @@ public class FreeboxHandler extends BaseBridgeHandler {
         commOk &= fetchSystemConfig();
         commOk &= fetchLCDConfig();
         commOk &= fetchWifiConfig();
-        commOk &= fetchxDslStatus();
         commOk &= fetchConnectionStatus();
         commOk &= fetchFtpConfig();
         commOk &= fetchAirMediaConfig();
@@ -306,6 +305,7 @@ public class FreeboxHandler extends BaseBridgeHandler {
     }
 
     private boolean fetchConnectionStatus() {
+        boolean result = true;
         try {
             FreeboxConnectionStatus connectionStatus = apiManager.getConnectionStatus();
             if (StringUtils.isNotEmpty(connectionStatus.getState())) {
@@ -314,11 +314,14 @@ public class FreeboxHandler extends BaseBridgeHandler {
             if (StringUtils.isNotEmpty(connectionStatus.getIpv4())) {
                 updateChannelStringState(IPV4, connectionStatus.getIpv4());
             }
+            if(connectionStatus.getMedia().equals("xdsl")){
+                result &= fetchxDslStatus();
+            }
             updateChannelDecimalState(RATEUP, connectionStatus.getRateUp());
             updateChannelDecimalState(RATEDOWN, connectionStatus.getRateDown());
             updateChannelDecimalState(BYTESUP, connectionStatus.getBytesUp());
             updateChannelDecimalState(BYTESDOWN, connectionStatus.getBytesDown());
-            return true;
+            return result;
         } catch (FreeboxException e) {
             logger.debug("Thing {}: exception in fetchConnectionStatus: {}", getThing().getUID(), e.getMessage(), e);
             return false;
