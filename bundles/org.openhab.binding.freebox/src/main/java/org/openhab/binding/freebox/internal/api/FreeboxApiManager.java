@@ -49,6 +49,8 @@ import org.openhab.binding.freebox.internal.api.model.FreeboxDiscoveryResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxEmptyResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxFtpConfig;
 import org.openhab.binding.freebox.internal.api.model.FreeboxFtpConfigResponse;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapterResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanConfigResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostsResponse;
@@ -352,6 +354,10 @@ public class FreeboxApiManager {
         request.setMedia(url);
         executePostUrl("airmedia/receivers/" + encodeUrl(airPlayName) + "/", gson.toJson(request),
                 FreeboxEmptyResponse.class, true, false, true);
+    }
+
+    public List<FreeboxHomeAdapter> getHomeAdapters() throws FreeboxException {
+        return executeGetUrl("home/adapters", FreeboxHomeAdapterResponse.class, true, false, true);
     }
 
     public void stopMedia(String airPlayName, String airPlayPassword) throws FreeboxException {

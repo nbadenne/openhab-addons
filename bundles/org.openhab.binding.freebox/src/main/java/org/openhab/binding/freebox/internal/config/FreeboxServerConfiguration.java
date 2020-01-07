@@ -29,6 +29,7 @@ public class FreeboxServerConfiguration {
     public static final String DISCOVER_NET_DEVICE = "discoverNetDevice";
     public static final String DISCOVER_NET_INTERFACE = "discoverNetInterface";
     public static final String DISCOVER_AIRPLAY_RECEIVER = "discoverAirPlayReceiver";
+    public static final String DISCOVER_HOME_ADAPTER = "discoverHomeAdapter";
 
     public String fqdn;
     public String appToken;
@@ -38,5 +39,6 @@ public class FreeboxServerConfiguration {
     public Boolean discoverNetDevice;
     public Boolean discoverNetInterface;
     public Boolean discoverAirPlayReceiver;
+    public Boolean discoverHomeAdapter;
 
 }

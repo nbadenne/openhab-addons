@@ -101,6 +101,14 @@
 				<advanced>true</advanced>
 			</parameter>
 
+			<parameter name="discoverHomeAdapter" type="boolean">
+				<label>Enable Home Adapter Discovery</label>
+				<description>Enable the discovery of Home Adapter things</description>
+				<default>true</default>
+				<required>false</required>
+				<advanced>true</advanced>
+			</parameter>
+
 		</config-description>
 	</bridge-type>
 
@@ -219,6 +227,8 @@
 			</parameter>
 		</config-description>
 	</thing-type>
+
+	
 
 	<channel-group-type id="state">
 		<label>Phone</label>

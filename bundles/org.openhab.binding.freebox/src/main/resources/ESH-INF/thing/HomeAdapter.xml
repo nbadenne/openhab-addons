@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="freebox"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="homeAdapter">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="server" />
+		</supported-bridge-type-refs>
+
+		<label>Home Adapters</label>
+		<description>Provides home adapters list status</description>
+
+		<channels>
+			<channel id="adapter_active" typeId="adapter_active" />
+		</channels>
+
+		<config-description>
+			<parameter name="name" type="text">
+				<label>Name</label>
+				<description>Name of the Home Adapter</description>
+				<required>true</required>
+			</parameter>
+		</config-description>
+    </thing-type>
+
+    <channel-type id="adapter_active">
+		<item-type>Switch</item-type>
+		<label>Adapter active</label>
+		<description>Indicates if this adapter is active</description>
+		<category>Switch</category>
+		<state readOnly="true" />
+	</channel-type>
+    
+</thing:thing-descriptions>

@@ -41,6 +41,7 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.freebox.internal.api.FreeboxException;
 import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
 import org.openhab.binding.freebox.internal.api.model.FreeboxCallEntry;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostL3Connectivity;
 import org.openhab.binding.freebox.internal.api.model.FreeboxPhoneStatus;
@@ -48,6 +49,7 @@ import org.openhab.binding.freebox.internal.config.FreeboxAirPlayDeviceConfigura
 import org.openhab.binding.freebox.internal.config.FreeboxNetDeviceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxNetInterfaceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxPhoneConfiguration;
+import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +71,7 @@ public class FreeboxThingHandler extends BaseThingHandler {
     private String netAddress;
     private String airPlayName;
     private String airPlayPassword;
+    private String homeAdapterName;
 
     public FreeboxThingHandler(Thing thing) {
         super(thing);
@@ -176,6 +179,10 @@ public class FreeboxThingHandler extends BaseThingHandler {
                     airPlayName = (airPlayName == null) ? "" : airPlayName;
                     airPlayPassword = getConfigAs(FreeboxAirPlayDeviceConfiguration.class).password;
                     airPlayPassword = (airPlayPassword == null) ? "" : airPlayPassword;
+                } else if (getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_ADAPTER)) {
+                    updateStatus(ThingStatus.ONLINE);
+                    homeAdapterName = getConfigAs(FreeboxHomeAdapterConfiguration.class).name;
+                    homeAdapterName = (homeAdapterName == null) ? "" : homeAdapterName;
                 }
             } else {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
@@ -341,6 +348,34 @@ public class FreeboxThingHandler extends BaseThingHandler {
                     "AirPlay device without video capability");
         } else {
             updateStatus(ThingStatus.ONLINE);
+        }
+    }
+
+    public void updateHomeAdapters(List<FreeboxHomeAdapter> homeAdapters) {
+        if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_ADAPTER)) {
+            return;
+        }
+        if(homeAdapterName == null) {
+            return;
+        }
+
+        boolean found = false;
+        boolean active = false;
+        if (homeAdapters != null) {
+            for (FreeboxHomeAdapter homeAdapter : homeAdapters) {
+                if (homeAdapterName.equals(homeAdapter.getLabel())) {
+                    found = true;
+                    if(homeAdapter.getStatus().equals("active")) {
+                        active = true;
+                    }
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home adapter not found");
+        } else {
+            updateState(new ChannelUID(getThing().getUID(), ADAPTER_ACTIVE), active ? OnOffType.ON : OnOffType.OFF);
         }
     }
 
