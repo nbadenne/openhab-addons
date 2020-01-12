@@ -1,18 +1,21 @@
 package org.openhab.binding.freebox.internal.api.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class FreeboxHomeType {
 
-    private Boolean astract;
+    @SerializedName("abstract")  
+    private Boolean _abstract;
     private Boolean generic;
     private String inherit;
     private String name;
 
-    public Boolean isAstract() {
-        return astract;
+    public Boolean get_abstract() {
+        return _abstract;
     }
 
-    public void setAstract(Boolean astract) {
-        this.astract = astract;
+    public void set_abstract(Boolean _abstract) {
+        this._abstract = _abstract;
     }
 
     public Boolean isGeneric() {
@@ -38,5 +41,7 @@ public class FreeboxHomeType {
     public void setName(String name) {
         this.name = name;
     }
+
+    
 
 }

@@ -39,7 +39,7 @@ public class FreeboxBindingConstants {
     public static final ThingTypeUID FREEBOX_THING_TYPE_NET_DEVICE = new ThingTypeUID(BINDING_ID, "net_device");
     public static final ThingTypeUID FREEBOX_THING_TYPE_NET_INTERFACE = new ThingTypeUID(BINDING_ID, "net_interface");
     public static final ThingTypeUID FREEBOX_THING_TYPE_AIRPLAY = new ThingTypeUID(BINDING_ID, "airplay");
-    public static final ThingTypeUID FREEBOX_THING_TYPE_HOME_ADAPTER = new ThingTypeUID(BINDING_ID, "home");
+    public static final ThingTypeUID FREEBOX_THING_TYPE_HOME_ADAPTER = new ThingTypeUID(BINDING_ID, "homeAdapter");
 
     // All supported Bridge types
     public static final Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES_UIDS = Collections
