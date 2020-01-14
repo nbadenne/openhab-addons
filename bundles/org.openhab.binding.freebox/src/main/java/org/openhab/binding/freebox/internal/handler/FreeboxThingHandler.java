@@ -19,7 +19,9 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +44,8 @@ import org.openhab.binding.freebox.internal.api.FreeboxException;
 import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
 import org.openhab.binding.freebox.internal.api.model.FreeboxCallEntry;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeEndpoint;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostL3Connectivity;
 import org.openhab.binding.freebox.internal.api.model.FreeboxPhoneStatus;
@@ -50,6 +54,7 @@ import org.openhab.binding.freebox.internal.config.FreeboxNetDeviceConfiguration
 import org.openhab.binding.freebox.internal.config.FreeboxNetInterfaceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxPhoneConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
+import org.openhab.binding.freebox.internal.config.FreeboxHomeNodeConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +71,14 @@ public class FreeboxThingHandler extends BaseThingHandler {
 
     private ScheduledFuture<?> phoneJob;
     private ScheduledFuture<?> callsJob;
+    private Map<String,ScheduledFuture<?>> doorDetectionJobs = new HashMap<String,ScheduledFuture<?>>();
     private FreeboxHandler bridgeHandler;
     private Calendar lastPhoneCheck;
     private String netAddress;
     private String airPlayName;
     private String airPlayPassword;
     private String homeAdapterName;
+    private String homeNodeName;
 
     public FreeboxThingHandler(Thing thing) {
         super(thing);
@@ -183,6 +190,25 @@ public class FreeboxThingHandler extends BaseThingHandler {
                     updateStatus(ThingStatus.ONLINE);
                     homeAdapterName = getConfigAs(FreeboxHomeAdapterConfiguration.class).name;
                     homeAdapterName = (homeAdapterName == null) ? "" : homeAdapterName;
+                } else if (getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_DOOR_SENSOR)) {
+                    updateStatus(ThingStatus.ONLINE);
+                    homeNodeName = getConfigAs(FreeboxHomeNodeConfiguration.class).name;
+                    if (doorDetectionJobs.isEmpty() || doorDetectionJobs.get(getConfigAs(FreeboxHomeNodeConfiguration.class).name).isCancelled()) {
+                        long pollingInterval = getConfigAs(FreeboxHomeNodeConfiguration.class).refreshInterval;
+                        if (pollingInterval > 0) {
+                            logger.debug("Scheduling node every {} seconds...", pollingInterval);
+                            callsJob = scheduler.scheduleWithFixedDelay(() -> {
+                                try {
+                                    updateHomeDoorSensor(getConfigAs(FreeboxHomeNodeConfiguration.class).id);
+                                } catch (Exception e) {
+                                    logger.debug("Phone calls job failed: {}", e.getMessage(), e);
+                                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                                            e.getMessage());
+                                }
+                            }, 1, pollingInterval, TimeUnit.SECONDS);
+                        }
+                    }
+                    homeNodeName = (homeNodeName == null) ? "" : homeNodeName;
                 }
             } else {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
@@ -376,6 +402,54 @@ public class FreeboxThingHandler extends BaseThingHandler {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home adapter not found");
         } else {
             updateState(new ChannelUID(getThing().getUID(), ADAPTER_ACTIVE), active ? OnOffType.ON : OnOffType.OFF);
+        }
+    }
+
+    public void updateHomeNode(List<FreeboxHomeNode> freeboxHomeNodes) {
+        if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_DOOR_SENSOR)) {
+            return;
+        }
+        if(homeNodeName == null){
+            return;
+        }
+
+        boolean found = false;
+        boolean active = false;
+        if (freeboxHomeNodes != null) {
+            for (FreeboxHomeNode homeNode : freeboxHomeNodes) {
+                if (homeNodeName.equals(homeNode.getName())) {
+                    found = true;
+                    if(homeNode.getStatus().equals("active")) {
+                        active = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+
+        if (!found){
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home node not found");
+        } else {
+            updateState(new ChannelUID(getThing().getUID(), NODE_ACTIVE), active ? OnOffType.ON : OnOffType.OFF);
+        }
+    }
+
+    public void updateHomeDoorSensor(Integer id) throws FreeboxException {
+        if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_DOOR_SENSOR)) {
+            return;
+        }
+        if(id == null) {
+            return;
+        }
+
+        FreeboxHomeNodeEndpoint freeboxHomeNodeEndpoint =  bridgeHandler.getApiManager().getHomeEndpointStatus(id, 6);
+        if (freeboxHomeNodeEndpoint == null) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home node not found");
+        } else {
+            updateState(new ChannelUID(getThing().getUID(), DOOR_OPEN), 
+                    (boolean) freeboxHomeNodeEndpoint.getValue() ? OnOffType.OFF : OnOffType.ON);
+
         }
     }
 

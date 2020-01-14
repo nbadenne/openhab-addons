@@ -51,6 +51,11 @@ import org.openhab.binding.freebox.internal.api.model.FreeboxFtpConfig;
 import org.openhab.binding.freebox.internal.api.model.FreeboxFtpConfigResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapterResponse;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeEndpoint;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeEndpointResponse;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeResponse;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodesResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanConfigResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostsResponse;
@@ -359,6 +364,18 @@ public class FreeboxApiManager {
     public List<FreeboxHomeAdapter> getHomeAdapters() throws FreeboxException {
         return executeGetUrl("home/adapters", FreeboxHomeAdapterResponse.class, true, false, true);
     }
+
+    public List<FreeboxHomeNode> getHomeNodes() throws FreeboxException {
+        return executeGetUrl("home/nodes", FreeboxHomeNodesResponse.class, true, false, true);
+   }
+
+    public FreeboxHomeNode getHomeNodeStatus(int id) throws FreeboxException {
+         return executeGetUrl("home/nodes/"+id, FreeboxHomeNodeResponse.class, true, false, true);
+    }
+
+    public FreeboxHomeNodeEndpoint getHomeEndpointStatus(int idNode, int idEndpoint) throws FreeboxException {
+        return executeGetUrl("home/endpoints/"+idNode+"/"+idEndpoint, FreeboxHomeNodeEndpointResponse.class, true, false, true);
+   }
 
     public void stopMedia(String airPlayName, String airPlayPassword) throws FreeboxException {
         FreeboxAirMediaReceiverRequest request = new FreeboxAirMediaReceiverRequest();

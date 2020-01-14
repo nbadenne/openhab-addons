@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.freebox.internal.discovery;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +31,12 @@ import org.openhab.binding.freebox.internal.FreeboxDataListener;
 import org.openhab.binding.freebox.internal.api.FreeboxException;
 import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostL3Connectivity;
 import org.openhab.binding.freebox.internal.config.FreeboxAirPlayDeviceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
+import org.openhab.binding.freebox.internal.config.FreeboxHomeNodeConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxNetDeviceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxNetInterfaceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxServerConfiguration;
@@ -128,8 +131,7 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
             try {
                 List<FreeboxLanHost> lanHosts = bridgeHandler.getApiManager().getLanHosts();
                 List<FreeboxAirMediaReceiver> airPlayDevices = bridgeHandler.getApiManager().getAirMediaReceivers();
-                List<FreeboxHomeAdapter> homeAdapters = bridgeHandler.getApiManager().getHomeAdapters();
-                onDataFetched(bridgeHandler.getThing().getUID(), lanHosts, airPlayDevices, homeAdapters);
+                onDataFetched(bridgeHandler.getThing().getUID(), lanHosts, airPlayDevices);
             } catch (FreeboxException e) {
                 logger.warn("Error while requesting data for things discovery", e);
             }
@@ -138,7 +140,7 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
 
     @Override
     public void onDataFetched(ThingUID bridge, List<FreeboxLanHost> lanHosts,
-            List<FreeboxAirMediaReceiver> airPlayDevices, List<FreeboxHomeAdapter> homeAdapters) {
+            List<FreeboxAirMediaReceiver> airPlayDevices) {
         if (bridge == null) {
             return;
         }
@@ -225,17 +227,47 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                 }
             }
         }
-        if (homeAdapters != null && discoverHomeAdapter) {
-            for (FreeboxHomeAdapter homeAdapter : homeAdapters) {
+        if (discoverHomeAdapter) {
+            List<FreeboxHomeAdapter> freeboxHomeAdapters = new ArrayList<FreeboxHomeAdapter>();
+            try {
+                freeboxHomeAdapters = bridgeHandler.getApiManager().getHomeAdapters();
+            } catch (FreeboxException e) {
+                logger.debug(e.getMessage());
+            }
+            for (FreeboxHomeAdapter homeAdapter : freeboxHomeAdapters) {
                 String name = homeAdapter.getType().getName();
                 if(StringUtils.isNotEmpty(name)){
                     String uid = name.replaceAll(":", "_");
                     thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_HOME_ADAPTER, bridge, uid);
                     logger.trace("Adding new Freebox Home Adapter {} to inbox", thingUID);
-                    Map<String, Object> properties = new HashMap<>(1);
+                    Map<String, Object> properties = new HashMap<>();
                     properties.put(FreeboxHomeAdapterConfiguration.NAME, homeAdapter.getLabel());
                     discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
                             .withBridge(bridge).withLabel(name + " (Home Adapter)").build();
+                    thingDiscovered(discoveryResult);
+                }
+            }
+            List<FreeboxHomeNode> freeboxHomeNodes = new ArrayList<FreeboxHomeNode>();
+            try {
+                freeboxHomeNodes = bridgeHandler.getApiManager().getHomeNodes();
+            } catch (FreeboxException e) {
+                logger.debug(e.getMessage());
+            }
+            for (FreeboxHomeNode freeboxHomeNode : freeboxHomeNodes) {
+                String name = freeboxHomeNode.getName();
+                logger.debug("Node : "+name);
+                if(StringUtils.isNotEmpty(name)){
+                    String uid = name.replaceAll(":", "_");
+                    if(freeboxHomeNode.getCategory().equals("dws")){
+                        thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_HOME_DOOR_SENSOR, bridge, uid);
+                    }else 
+                        continue;
+                    logger.trace("Adding new Freebox Home Node {} to inbox", thingUID);
+                    Map<String, Object> properties = new HashMap<>();
+                    properties.put(FreeboxHomeNodeConfiguration.NAME, freeboxHomeNode.getName());
+                    properties.put(FreeboxHomeNodeConfiguration.ID, freeboxHomeNode.getId());
+                    discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
+                            .withBridge(bridge).withLabel(freeboxHomeNode.getLabel() + " (Home Node)").build();
                     thingDiscovered(discoveryResult);
                 }
             }

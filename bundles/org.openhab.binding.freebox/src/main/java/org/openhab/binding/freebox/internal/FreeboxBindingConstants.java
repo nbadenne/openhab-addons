@@ -40,6 +40,7 @@ public class FreeboxBindingConstants {
     public static final ThingTypeUID FREEBOX_THING_TYPE_NET_INTERFACE = new ThingTypeUID(BINDING_ID, "net_interface");
     public static final ThingTypeUID FREEBOX_THING_TYPE_AIRPLAY = new ThingTypeUID(BINDING_ID, "airplay");
     public static final ThingTypeUID FREEBOX_THING_TYPE_HOME_ADAPTER = new ThingTypeUID(BINDING_ID, "homeAdapter");
+    public static final ThingTypeUID FREEBOX_THING_TYPE_HOME_DOOR_SENSOR = new ThingTypeUID(BINDING_ID, "homeDoorSensor");
 
     // All supported Bridge types
     public static final Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES_UIDS = Collections
@@ -48,7 +49,8 @@ public class FreeboxBindingConstants {
     // All supported Thing types
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
             .unmodifiableSet(Stream.of(FREEBOX_THING_TYPE_PHONE, FREEBOX_THING_TYPE_NET_DEVICE,
-                    FREEBOX_THING_TYPE_NET_INTERFACE, FREEBOX_THING_TYPE_AIRPLAY, FREEBOX_THING_TYPE_HOME_ADAPTER).collect(Collectors.toSet()));
+                    FREEBOX_THING_TYPE_NET_INTERFACE, FREEBOX_THING_TYPE_AIRPLAY, FREEBOX_THING_TYPE_HOME_ADAPTER,
+                    FREEBOX_THING_TYPE_HOME_DOOR_SENSOR).collect(Collectors.toSet()));
 
     // List of properties
     public static final String API_BASE_URL = "apiBaseUrl";
@@ -98,4 +100,6 @@ public class FreeboxBindingConstants {
     public static final String PLAYURL = "playurl";
     public static final String STOP = "stop";
     public static final String ADAPTER_ACTIVE = "adapter_active";
+    public static final String NODE_ACTIVE = "node_active";
+    public static final String DOOR_OPEN = "door_open";
 }

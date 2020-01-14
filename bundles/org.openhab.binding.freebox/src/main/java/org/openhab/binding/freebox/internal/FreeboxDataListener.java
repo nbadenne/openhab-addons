@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.binding.freebox.internal.api.FreeboxException;
 import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
@@ -46,5 +47,5 @@ public interface FreeboxDataListener {
      * @param airPlayDevices the list of AirPlay devices received from the Freebox server.
      */
     public void onDataFetched(ThingUID bridge, List<FreeboxLanHost> lanHosts,
-            List<FreeboxAirMediaReceiver> airPlayDevices, List<FreeboxHomeAdapter> homeAdapters);
+            List<FreeboxAirMediaReceiver> airPlayDevices);
 }

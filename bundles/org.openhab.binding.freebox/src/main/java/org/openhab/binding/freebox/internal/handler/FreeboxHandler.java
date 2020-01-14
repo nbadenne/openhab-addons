@@ -46,6 +46,7 @@ import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
 import org.openhab.binding.freebox.internal.api.model.FreeboxConnectionStatus;
 import org.openhab.binding.freebox.internal.api.model.FreeboxDiscoveryResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLcdConfig;
 import org.openhab.binding.freebox.internal.api.model.FreeboxSambaConfig;
@@ -182,15 +183,14 @@ public class FreeboxHandler extends BaseBridgeHandler {
         commOk &= (lanHosts != null);
         List<FreeboxAirMediaReceiver> airPlayDevices = fetchAirPlayDevices();
         commOk &= (airPlayDevices != null);
-        List<FreeboxHomeAdapter> homeAdapters = new ArrayList<FreeboxHomeAdapter>();
         if(getConfigAs(FreeboxServerConfiguration.class).discoverHomeAdapter == true) {
-            homeAdapters = fetchHomeAdapters();
+            fetchHomeAdapters();
+            fetchHomeNodes();
         }
-        commOk &= (homeAdapters != null);
 
         // Trigger a new discovery of things
         for (FreeboxDataListener dataListener : dataListeners) {
-            dataListener.onDataFetched(getThing().getUID(), lanHosts, airPlayDevices, homeAdapters);
+            dataListener.onDataFetched(getThing().getUID(), lanHosts, airPlayDevices);
         }
 
         if (commOk) {
@@ -497,7 +497,7 @@ public class FreeboxHandler extends BaseBridgeHandler {
         }
     }
 
-    private synchronized List<FreeboxHomeAdapter> fetchHomeAdapters() {
+    private synchronized void fetchHomeAdapters() {
         try {
             List<FreeboxHomeAdapter> devices = apiManager.getHomeAdapters();
             if (devices == null) {
@@ -511,11 +511,27 @@ public class FreeboxHandler extends BaseBridgeHandler {
                     ((FreeboxThingHandler) handler).updateHomeAdapters(devices);
                 }
             }
-
-            return devices;
         } catch (FreeboxException e) {
             logger.debug("Thing {}: exception in fetchHomeAdapters: {}", getThing().getUID(), e.getMessage(), e);
-            return null;
+        }
+    }
+
+    private synchronized void fetchHomeNodes() {
+        try {
+            List<FreeboxHomeNode> devices = apiManager.getHomeNodes();
+            if (devices == null) {
+                devices = new ArrayList<>();
+            }
+
+            // The update of channels is delegated to each thing handler
+            for (Thing thing : getThing().getThings()) {
+                ThingHandler handler = thing.getHandler();
+                if (handler instanceof FreeboxThingHandler) {
+                    ((FreeboxThingHandler) handler).updateHomeNode(devices);
+                }
+            }
+        } catch (FreeboxException e) {
+            logger.debug("Thing {}: exception in fetchHomeAdapters: {}", getThing().getUID(), e.getMessage(), e);
         }
     }
 
