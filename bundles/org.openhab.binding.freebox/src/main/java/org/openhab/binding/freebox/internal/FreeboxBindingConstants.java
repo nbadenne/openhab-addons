@@ -102,4 +102,5 @@ public class FreeboxBindingConstants {
     public static final String ADAPTER_ACTIVE = "adapter_active";
     public static final String NODE_ACTIVE = "node_active";
     public static final String DOOR_OPEN = "door_open";
+    public static final String BATTTERY_LEVEL = "battery_level";
 }

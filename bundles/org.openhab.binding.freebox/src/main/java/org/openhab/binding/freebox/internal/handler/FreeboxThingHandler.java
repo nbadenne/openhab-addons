@@ -53,14 +53,13 @@ import org.openhab.binding.freebox.internal.config.FreeboxAirPlayDeviceConfigura
 import org.openhab.binding.freebox.internal.config.FreeboxNetDeviceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxNetInterfaceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxPhoneConfiguration;
-import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxHomeNodeConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link FreeboxThingHandler} is responsible for handling everything associated to
- * any Freebox thing types except the bridge thing type.
+ * The {@link FreeboxThingHandler} is responsible for handling everything
+ * associated to any Freebox thing types except the bridge thing type.
  *
  * @author Laurent Garnier - Initial contribution
  * @author Laurent Garnier - use new internal API manager
@@ -71,14 +70,12 @@ public class FreeboxThingHandler extends BaseThingHandler {
 
     private ScheduledFuture<?> phoneJob;
     private ScheduledFuture<?> callsJob;
-    private Map<String,ScheduledFuture<?>> doorDetectionJobs = new HashMap<String,ScheduledFuture<?>>();
+    private Map<String, ScheduledFuture<?>> doorDetectionJobs = new HashMap<String, ScheduledFuture<?>>();
     private FreeboxHandler bridgeHandler;
     private Calendar lastPhoneCheck;
     private String netAddress;
     private String airPlayName;
     private String airPlayPassword;
-    private String homeAdapterName;
-    private String homeNodeName;
 
     public FreeboxThingHandler(Thing thing) {
         super(thing);
@@ -99,16 +96,16 @@ public class FreeboxThingHandler extends BaseThingHandler {
             return;
         }
         switch (channelUID.getId()) {
-            case PLAYURL:
-                playMedia(channelUID, command);
-                break;
-            case STOP:
-                stopMedia(channelUID, command);
-                break;
-            default:
-                logger.debug("Thing {}: unexpected command {} from channel {}", getThing().getUID(), command,
-                        channelUID.getId());
-                break;
+        case PLAYURL:
+            playMedia(channelUID, command);
+            break;
+        case STOP:
+            stopMedia(channelUID, command);
+            break;
+        default:
+            logger.debug("Thing {}: unexpected command {} from channel {}", getThing().getUID(), command,
+                    channelUID.getId());
+            break;
         }
     }
 
@@ -188,18 +185,16 @@ public class FreeboxThingHandler extends BaseThingHandler {
                     airPlayPassword = (airPlayPassword == null) ? "" : airPlayPassword;
                 } else if (getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_ADAPTER)) {
                     updateStatus(ThingStatus.ONLINE);
-                    homeAdapterName = getConfigAs(FreeboxHomeAdapterConfiguration.class).name;
-                    homeAdapterName = (homeAdapterName == null) ? "" : homeAdapterName;
                 } else if (getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_DOOR_SENSOR)) {
                     updateStatus(ThingStatus.ONLINE);
-                    homeNodeName = getConfigAs(FreeboxHomeNodeConfiguration.class).name;
-                    if (doorDetectionJobs.isEmpty() || doorDetectionJobs.get(getConfigAs(FreeboxHomeNodeConfiguration.class).name).isCancelled()) {
+                    if (doorDetectionJobs.isEmpty() || doorDetectionJobs
+                            .get(getConfigAs(FreeboxHomeNodeConfiguration.class).name).isCancelled()) {
                         long pollingInterval = getConfigAs(FreeboxHomeNodeConfiguration.class).refreshInterval;
                         if (pollingInterval > 0) {
                             logger.debug("Scheduling node every {} seconds...", pollingInterval);
                             callsJob = scheduler.scheduleWithFixedDelay(() -> {
                                 try {
-                                    updateHomeDoorSensor(getConfigAs(FreeboxHomeNodeConfiguration.class).id);
+                                    updateHomeDoorSensor((int) Double.parseDouble(getThing().getProperties().get("id")));
                                 } catch (Exception e) {
                                     logger.debug("Phone calls job failed: {}", e.getMessage(), e);
                                     updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
@@ -208,7 +203,6 @@ public class FreeboxThingHandler extends BaseThingHandler {
                             }, 1, pollingInterval, TimeUnit.SECONDS);
                         }
                     }
-                    homeNodeName = (homeNodeName == null) ? "" : homeNodeName;
                 }
             } else {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
@@ -354,7 +348,8 @@ public class FreeboxThingHandler extends BaseThingHandler {
             return;
         }
 
-        // The Freebox API allows pushing media only to receivers with photo or video capabilities
+        // The Freebox API allows pushing media only to receivers with photo or video
+        // capabilities
         // but not to receivers with only audio capability
         boolean found = false;
         boolean usable = false;
@@ -381,17 +376,15 @@ public class FreeboxThingHandler extends BaseThingHandler {
         if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_ADAPTER)) {
             return;
         }
-        if(homeAdapterName == null) {
-            return;
-        }
 
+        String name = getThing().getProperties().get("name");
         boolean found = false;
         boolean active = false;
         if (homeAdapters != null) {
             for (FreeboxHomeAdapter homeAdapter : homeAdapters) {
-                if (homeAdapterName.equals(homeAdapter.getLabel())) {
+                if (name.equals(homeAdapter.getLabel())) {
                     found = true;
-                    if(homeAdapter.getStatus().equals("active")) {
+                    if (homeAdapter.getStatus().equals("active")) {
                         active = true;
                     }
                     break;
@@ -409,17 +402,15 @@ public class FreeboxThingHandler extends BaseThingHandler {
         if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_DOOR_SENSOR)) {
             return;
         }
-        if(homeNodeName == null){
-            return;
-        }
 
+        String name = getThing().getProperties().get("name");
         boolean found = false;
         boolean active = false;
         if (freeboxHomeNodes != null) {
             for (FreeboxHomeNode homeNode : freeboxHomeNodes) {
-                if (homeNodeName.equals(homeNode.getName())) {
+                if (name.equals(homeNode.getName())) {
                     found = true;
-                    if(homeNode.getStatus().equals("active")) {
+                    if (homeNode.getStatus().equals("active")) {
                         active = true;
                     }
                     break;
@@ -427,8 +418,7 @@ public class FreeboxThingHandler extends BaseThingHandler {
             }
         }
 
-
-        if (!found){
+        if (!found) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home node not found");
         } else {
             updateState(new ChannelUID(getThing().getUID(), NODE_ACTIVE), active ? OnOffType.ON : OnOffType.OFF);
@@ -439,17 +429,21 @@ public class FreeboxThingHandler extends BaseThingHandler {
         if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_DOOR_SENSOR)) {
             return;
         }
-        if(id == null) {
+        if (id == null) {
             return;
         }
 
-        FreeboxHomeNodeEndpoint freeboxHomeNodeEndpoint =  bridgeHandler.getApiManager().getHomeEndpointStatus(id, 6);
-        if (freeboxHomeNodeEndpoint == null) {
+        FreeboxHomeNodeEndpoint freeboxHomeNodeEndpointOpen = bridgeHandler.getApiManager().getHomeEndpointStatus(id,
+                7);
+        FreeboxHomeNodeEndpoint freeboxHomeNodeEndpointBattery = bridgeHandler.getApiManager().getHomeEndpointStatus(id,
+                8);
+        if (freeboxHomeNodeEndpointOpen == null || freeboxHomeNodeEndpointBattery == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home node not found");
         } else {
-            updateState(new ChannelUID(getThing().getUID(), DOOR_OPEN), 
-                    (boolean) freeboxHomeNodeEndpoint.getValue() ? OnOffType.OFF : OnOffType.ON);
-
+            updateState(new ChannelUID(getThing().getUID(), DOOR_OPEN),
+                    (boolean) freeboxHomeNodeEndpointOpen.getValue() ? OnOffType.ON : OnOffType.OFF);
+            updateState(new ChannelUID(getThing().getUID(), BATTTERY_LEVEL),
+                    new DecimalType((double) freeboxHomeNodeEndpointBattery.getValue()));
         }
     }
 

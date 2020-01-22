@@ -17,11 +17,6 @@
 		</channels>
 
 		<config-description>
-			<parameter name="name" type="text">
-				<label>Name</label>
-				<description>Name of the Home Adapter</description>
-				<required>true</required>
-			</parameter>
 		</config-description>
     </thing-type>
 

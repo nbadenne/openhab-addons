@@ -15,19 +15,10 @@
 		<channels>
 			<channel id="node_active" typeId="node_active" />
 			<channel id="door_open" typeId="door_open" />
+			<channel id="battery_level" typeId="battery_level" />
 		</channels>
 
 		<config-description>
-			<parameter name="name" type="text">
-				<label>Name</label>
-				<description>Name of the Home Adapter</description>
-				<required>true</required>
-			</parameter>
-			<parameter name="id" type="integer">
-				<label>Id</label>
-				<description>Id of the Home Adapter</description>
-				<required>true</required>
-			</parameter>
 			<parameter name="refreshInterval" type="integer" min="0">
 				<label>Refresh Interval</label>
 				<description>The refresh interval in seconds which is used to poll door state</description>
@@ -50,6 +41,13 @@
 		<label>Door open</label>
 		<description>Indicates the door is open</description>
 		<category>Switch</category>
+		<state readOnly="true" />
+	</channel-type>
+	<channel-type id="battery_level">
+		<item-type>Number</item-type>
+		<label>Battery</label>
+		<description>Indicate battery level</description>
+		<category>Number</category>
 		<state readOnly="true" />
 	</channel-type>
     
