@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="freebox"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="net_device">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="server" />
+		</supported-bridge-type-refs>
+
+		<label>Network Device</label>
+		<description>Provides network device reachability</description>
+
+		<channels>
+			<channel id="reachable" typeId="reachable" />
+		</channels>
+
+		<config-description>
+			<parameter name="macAddress" type="text">
+				<label>MAC Address</label>
+				<description>The MAC address of the network device</description>
+				<default></default>
+				<required>true</required>
+			</parameter>
+
+		</config-description>
+	</thing-type>
+</thing:thing-descriptions>

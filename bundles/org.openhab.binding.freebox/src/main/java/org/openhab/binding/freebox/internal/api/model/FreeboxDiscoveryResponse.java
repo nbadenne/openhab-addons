@@ -28,6 +28,8 @@ public class FreeboxDiscoveryResponse {
     private String apiDomain;
     private Boolean httpsAvailable;
     private Integer httpsPort;
+    private String box_model_name;
+    private String box_model;
 
     public String getUid() {
         return uid;
@@ -60,4 +62,13 @@ public class FreeboxDiscoveryResponse {
     public Integer getHttpsPort() {
         return httpsPort;
     }
+
+    public String getBox_model_name() {
+        return box_model_name;
+    }
+
+    public String getBox_model() {
+        return box_model;
+    }
+    
 }

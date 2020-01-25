@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="freebox"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="airplay">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="server" />
+		</supported-bridge-type-refs>
+
+		<label>AirPlay Receiver</label>
+		<description>Provides media control from one AirPlay device</description>
+
+		<channels>
+			<channel id="playurl" typeId="playurl" />
+			<channel id="stop" typeId="stop" />
+		</channels>
+
+		<config-description>
+			<parameter name="name" type="text">
+				<label>Name</label>
+				<description>Name of the AirPlay device</description>
+				<required>true</required>
+			</parameter>
+			<parameter name="password" type="text">
+				<context>password</context>
+				<label>Password</label>
+				<description>AirPlay password</description>
+				<default></default>
+				<required>false</required>
+			</parameter>
+			<parameter name="acceptAllMp3" type="boolean">
+				<label>Accept All MP3</label>
+				<description>Accept any bitrate for MP3 audio or only bitrates greater than 64 kbps</description>
+				<default>true</default>
+				<required>false</required>
+				<advanced>true</advanced>
+			</parameter>
+		</config-description>
+	</thing-type>
+</thing:thing-descriptions>

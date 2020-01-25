@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="freebox"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="freeboxDelta">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="server" />
+		</supported-bridge-type-refs>
+
+		<label>Freebox Delta</label>
+		<description>Provides Freebox Delta information</description>
+
+		<channels>
+			<channel id="fwversion" typeId="fwversion" />
+			<channel id="uptime" typeId="uptime" />
+			<channel id="restarted" typeId="restarted" />
+			<channel id="tempcpum" typeId="tempcpum" />
+			<channel id="tempcpub" typeId="tempcpub" />
+			<channel id="tempswitch" typeId="tempswitch" />
+			<channel id="fanspeed" typeId="fanspeed" />
+			<channel id="reboot" typeId="reboot" />
+			<channel id="lcd_brightness" typeId="lcd_brightness" />
+			<channel id="lcd_orientation" typeId="lcd_orientation" />
+			<channel id="lcd_forced" typeId="lcd_forced" />
+			<channel id="wifi_status" typeId="wifi_status" />
+			<channel id="ftp_status" typeId="ftp_status" />
+			<channel id="airmedia_status" typeId="airmedia_status" />
+			<channel id="upnpav_status" typeId="upnpav_status" />
+			<channel id="sambafileshare_status" typeId="sambafileshare_status" />
+			<channel id="sambaprintershare_status" typeId="sambaprintershare_status" />
+			<channel id="xdsl_status" typeId="xdsl_status" />
+			<channel id="line_status" typeId="line_status" />
+			<channel id="ipv4" typeId="ipv4" />
+			<channel id="rate_up" typeId="rate_up" />
+			<channel id="rate_down" typeId="rate_down" />
+			<channel id="bytes_up" typeId="bytes_up" />
+			<channel id="bytes_down" typeId="bytes_down" />
+		</channels>
+
+		<config-description>
+			<parameter name="pollingInterval" type="integer" min="1">
+                <label>Refresh Interval</label>
+                <description>The refresh interval in seconds which is used to poll given Freebox Server</description>
+                <default>30</default>
+                <required>false</required>
+            </parameter>
+		</config-description>
+    </thing-type>
+    
+</thing:thing-descriptions>

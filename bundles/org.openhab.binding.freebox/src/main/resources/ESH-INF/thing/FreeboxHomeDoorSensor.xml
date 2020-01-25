@@ -29,26 +29,6 @@
 		
     </thing-type>
 
-    <channel-type id="node_active">
-		<item-type>Switch</item-type>
-		<label>Node active</label>
-		<description>Indicates if this node is active</description>
-		<category>Switch</category>
-		<state readOnly="true" />
-	</channel-type>
-	<channel-type id="door_open">
-		<item-type>Switch</item-type>
-		<label>Door open</label>
-		<description>Indicates the door is open</description>
-		<category>Switch</category>
-		<state readOnly="true" />
-	</channel-type>
-	<channel-type id="battery_level">
-		<item-type>Number</item-type>
-		<label>Battery</label>
-		<description>Indicate battery level</description>
-		<category>Number</category>
-		<state readOnly="true" />
-	</channel-type>
+    
     
 </thing:thing-descriptions>

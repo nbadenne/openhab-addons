@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="freebox"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="phone">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="server" />
+		</supported-bridge-type-refs>
+
+		<label>Phone</label>
+		<description>Provides various informations regarding the phone state and the phone calls</description>
+
+		<channel-groups>
+			<channel-group id="state" typeId="state" />
+			<channel-group id="any" typeId="any" />
+			<channel-group id="accepted" typeId="accepted" />
+			<channel-group id="missed" typeId="missed" />
+			<channel-group id="outgoing" typeId="outgoing" />
+		</channel-groups>
+
+		<config-description>
+			<parameter name="refreshPhoneInterval" type="integer" min="0">
+				<label>Phone State Refresh Interval</label>
+				<description>The refresh interval in seconds which is used to poll given Freebox Server for phone state</description>
+				<default>2</default>
+				<required>false</required>
+			</parameter>
+
+			<parameter name="refreshPhoneCallsInterval" type="integer" min="0">
+				<label>Phone Calls Refresh Interval</label>
+				<description>The refresh interval in seconds which is used to poll given Freebox Server for phone calls</description>
+				<default>60</default>
+				<required>false</required>
+			</parameter>
+
+		</config-description>
+	</thing-type>
+</thing:thing-descriptions>

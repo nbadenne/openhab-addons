@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.eclipse.smarthome.core.audio.AudioHTTPServer;
 import org.eclipse.smarthome.core.audio.AudioSink;
@@ -36,7 +35,9 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.freebox.internal.discovery.FreeboxDiscoveryService;
+import org.openhab.binding.freebox.internal.handler.FreeboxDeltaHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxHandler;
+import org.openhab.binding.freebox.internal.handler.FreeboxHomeHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxThingHandler;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -81,25 +82,9 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
+    logger.debug("thingTypeUID = "+thingTypeUID);
+    logger.debug("setthingTypeUID = "+SUPPORTED_THING_TYPES_UIDS);
         return SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID);
-    }
-
-    @Override
-    public Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration, ThingUID thingUID,
-            ThingUID bridgeUID) {
-        if (thingTypeUID.equals(FreeboxBindingConstants.FREEBOX_BRIDGE_TYPE_SERVER)) {
-            return super.createThing(thingTypeUID, configuration, thingUID, null);
-        } else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {
-            ThingUID newThingUID;
-            if (bridgeUID != null && thingUID != null) {
-                newThingUID = new ThingUID(thingTypeUID, bridgeUID, thingUID.getId());
-            } else {
-                newThingUID = thingUID;
-            }
-            return super.createThing(thingTypeUID, configuration, newThingUID, bridgeUID);
-        }
-        throw new IllegalArgumentException(
-                "The thing type " + thingTypeUID + " is not supported by the Freebox binding.");
     }
 
     @Override
@@ -110,13 +95,20 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
             FreeboxHandler handler = new FreeboxHandler((Bridge) thing);
             registerDiscoveryService(handler);
             return handler;
-        } else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {
+        } else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_HOME_ADAPTER.equals(thingTypeUID)) {
+            FreeboxHomeHandler handler = new FreeboxHomeHandler(thing);
+            return handler;
+        } else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_DELTA_SERVER.equals(thingTypeUID)) {
+            FreeboxDeltaHandler handler = new FreeboxDeltaHandler(thing);
+            return handler;
+        }/**
+        else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {
             FreeboxThingHandler handler = new FreeboxThingHandler(thing);
             if (FreeboxBindingConstants.FREEBOX_THING_TYPE_AIRPLAY.equals(thingTypeUID)) {
                 registerAudioSink(handler);
             }
             return handler;
-        }
+        }**/
 
         return null;
     }

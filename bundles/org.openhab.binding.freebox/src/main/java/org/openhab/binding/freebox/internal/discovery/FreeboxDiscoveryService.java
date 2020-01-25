@@ -12,37 +12,27 @@
  */
 package org.openhab.binding.freebox.internal.discovery;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.smarthome.core.thing.binding.ThingHandler;
+import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
 import org.openhab.binding.freebox.internal.FreeboxBindingConstants;
-import org.openhab.binding.freebox.internal.FreeboxDataListener;
-import org.openhab.binding.freebox.internal.api.FreeboxException;
-import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
-import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
-import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
-import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
-import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostL3Connectivity;
-import org.openhab.binding.freebox.internal.config.FreeboxAirPlayDeviceConfiguration;
-import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
-import org.openhab.binding.freebox.internal.config.FreeboxHomeNodeConfiguration;
-import org.openhab.binding.freebox.internal.config.FreeboxNetDeviceConfiguration;
-import org.openhab.binding.freebox.internal.config.FreeboxNetInterfaceConfiguration;
-import org.openhab.binding.freebox.internal.config.FreeboxServerConfiguration;
+import org.openhab.binding.freebox.internal.api.model.FreeboxType;
 import org.openhab.binding.freebox.internal.handler.FreeboxHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * The {@link FreeboxDiscoveryService} is responsible for discovering all things
@@ -52,11 +42,13 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - add discovery settings
  * @author Laurent Garnier - use new internal API manager
  */
-public class FreeboxDiscoveryService extends AbstractDiscoveryService implements FreeboxDataListener {
+public class FreeboxDiscoveryService extends AbstractDiscoveryService implements DiscoveryService, ThingHandlerService {
 
     private final Logger logger = LoggerFactory.getLogger(FreeboxDiscoveryService.class);
 
     private static final int SEARCH_TIME = 10;
+
+    private ScheduledFuture<?> scanTask;
 
     private static final String PHONE_ID = "wired";
 
@@ -83,61 +75,50 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
     @Override
     public void activate(@Nullable Map<@NonNull String, @Nullable Object> configProperties) {
         super.activate(configProperties);
-        applyConfig(configProperties);
-        bridgeHandler.registerDataListener(this);
     }
 
     @Override
     public void deactivate() {
-        bridgeHandler.unregisterDataListener(this);
         super.deactivate();
     }
 
-    @Override
-    public void applyConfig(Map<String, Object> configProperties) {
-        if (configProperties != null) {
-            Object property = configProperties.get(FreeboxServerConfiguration.DISCOVER_PHONE);
-            if (property != null) {
-                discoverPhone = ((Boolean) property).booleanValue();
-            }
-            property = configProperties.get(FreeboxServerConfiguration.DISCOVER_NET_DEVICE);
-            if (property != null) {
-                discoverNetDevice = ((Boolean) property).booleanValue();
-            }
-            property = configProperties.get(FreeboxServerConfiguration.DISCOVER_NET_INTERFACE);
-            if (property != null) {
-                discoverNetInterface = ((Boolean) property).booleanValue();
-            }
-            property = configProperties.get(FreeboxServerConfiguration.DISCOVER_AIRPLAY_RECEIVER);
-            if (property != null) {
-                discoverAirPlayReceiver = ((Boolean) property).booleanValue();
-            }
-            property = configProperties.get(FreeboxServerConfiguration.DISCOVER_HOME_ADAPTER);
-            if (property != null) {
-                discoverHomeAdapter = ((Boolean) property).booleanValue();
-            }
-        }
-        logger.debug("Freebox discovery - discoverPhone : {}", discoverPhone);
-        logger.debug("Freebox discovery - discoverNetDevice : {}", discoverNetDevice);
-        logger.debug("Freebox discovery - discoverNetInterface : {}", discoverNetInterface);
-        logger.debug("Freebox discovery - discoverAirPlayReceiver : {}", discoverAirPlayReceiver);
-        logger.debug("Freebox discovery - discoverHomeAdapter : {}", discoverHomeAdapter);
-    }
 
     @Override
     protected void startScan() {
         logger.debug("Starting Freebox discovery scan");
-        if (bridgeHandler.getThing().getStatus() == ThingStatus.ONLINE) {
-            try {
-                List<FreeboxLanHost> lanHosts = bridgeHandler.getApiManager().getLanHosts();
-                List<FreeboxAirMediaReceiver> airPlayDevices = bridgeHandler.getApiManager().getAirMediaReceivers();
-                onDataFetched(bridgeHandler.getThing().getUID(), lanHosts, airPlayDevices);
-            } catch (FreeboxException e) {
-                logger.warn("Error while requesting data for things discovery", e);
+        if (bridgeHandler != null && bridgeHandler.getThing().getStatus() == ThingStatus.ONLINE) {
+            if (this.scanTask != null) {
+                scanTask.cancel(true);
             }
+            this.scanTask = scheduler.schedule(() -> discoverFreebox(), 0, TimeUnit.SECONDS);
         }
     }
 
+    @Override
+    protected void stopScan() {
+        super.stopScan();
+
+        if (this.scanTask != null) {
+            this.scanTask.cancel(true);
+            this.scanTask = null;
+        }
+    }
+
+    private void discoverFreebox(){
+        if (bridgeHandler != null && bridgeHandler.getThing().getStatus() == ThingStatus.ONLINE) {
+            ThingUID thingUID;
+            ThingUID bridge = bridgeHandler.getThing().getUID();
+            DiscoveryResult discoveryResult;
+            if(bridgeHandler.getFreeboxDiscoveryResponse().getBox_model().equals(FreeboxType.FREEBOX_DELTA_R1.getName())){
+                thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_DELTA_SERVER, bridge, "Delta");
+                discoveryResult = DiscoveryResultBuilder.create(thingUID).withBridge(bridge).withLabel("Freebox Delta")
+                .build();
+                thingDiscovered(discoveryResult);
+            }
+        
+        }
+    }
+/**
     @Override
     public void onDataFetched(ThingUID bridge, List<FreeboxLanHost> lanHosts,
             List<FreeboxAirMediaReceiver> airPlayDevices) {
@@ -272,7 +253,20 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                 }
             }
         }
+       
 
     }
+        **/
 
+    @Override
+    public void setThingHandler(@Nullable ThingHandler handler) {
+        if (handler instanceof FreeboxHandler) {
+            bridgeHandler = (FreeboxHandler) handler;
+        }
+    }
+
+    @Override
+    public @Nullable ThingHandler getThingHandler() {
+        return bridgeHandler;
+    }
 }

@@ -35,6 +35,8 @@ public class FreeboxBindingConstants {
     public static final ThingTypeUID FREEBOX_BRIDGE_TYPE_SERVER = new ThingTypeUID(BINDING_ID, "server");
 
     // List of all Thing Type UIDs
+    public static final ThingTypeUID FREEBOX_THING_TYPE_REVOLUTION_SERVER = new ThingTypeUID(BINDING_ID, "freeboxRevolution");
+    public static final ThingTypeUID FREEBOX_THING_TYPE_DELTA_SERVER = new ThingTypeUID(BINDING_ID, "freeboxDelta");
     public static final ThingTypeUID FREEBOX_THING_TYPE_PHONE = new ThingTypeUID(BINDING_ID, "phone");
     public static final ThingTypeUID FREEBOX_THING_TYPE_NET_DEVICE = new ThingTypeUID(BINDING_ID, "net_device");
     public static final ThingTypeUID FREEBOX_THING_TYPE_NET_INTERFACE = new ThingTypeUID(BINDING_ID, "net_interface");
@@ -48,7 +50,7 @@ public class FreeboxBindingConstants {
 
     // All supported Thing types
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
-            .unmodifiableSet(Stream.of(FREEBOX_THING_TYPE_PHONE, FREEBOX_THING_TYPE_NET_DEVICE,
+            .unmodifiableSet(Stream.of(FREEBOX_THING_TYPE_REVOLUTION_SERVER, FREEBOX_THING_TYPE_DELTA_SERVER,FREEBOX_THING_TYPE_PHONE, FREEBOX_THING_TYPE_NET_DEVICE,
                     FREEBOX_THING_TYPE_NET_INTERFACE, FREEBOX_THING_TYPE_AIRPLAY, FREEBOX_THING_TYPE_HOME_ADAPTER,
                     FREEBOX_THING_TYPE_HOME_DOOR_SENSOR).collect(Collectors.toSet()));
 
@@ -103,4 +105,5 @@ public class FreeboxBindingConstants {
     public static final String NODE_ACTIVE = "node_active";
     public static final String DOOR_OPEN = "door_open";
     public static final String BATTTERY_LEVEL = "battery_level";
+
 }

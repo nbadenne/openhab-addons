@@ -17,15 +17,13 @@
 		</channels>
 
 		<config-description>
+			<parameter name="refreshInterval" type="integer" min="1">
+                <label>Refresh Interval</label>
+                <description>The refresh interval in seconds which is used to poll given Freebox Server</description>
+                <default>30</default>
+                <required>false</required>
+            </parameter>
 		</config-description>
     </thing-type>
-
-    <channel-type id="adapter_active">
-		<item-type>Switch</item-type>
-		<label>Adapter active</label>
-		<description>Indicates if this adapter is active</description>
-		<category>Switch</category>
-		<state readOnly="true" />
-	</channel-type>
     
 </thing:thing-descriptions>

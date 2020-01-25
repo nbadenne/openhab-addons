@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="freebox"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+    <thing-type id="net_interface">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="server" />
+		</supported-bridge-type-refs>
+
+		<label>Network Interface</label>
+		<description>Provides network interface reachability</description>
+
+		<channels>
+			<channel id="reachable" typeId="reachable" />
+		</channels>
+
+		<config-description>
+			<parameter name="ipAddress" type="text">
+				<label>IP Address</label>
+				<description>The IP address (v4 or v6) of the network interface</description>
+				<default></default>
+				<required>true</required>
+			</parameter>
+
+		</config-description>
+	</thing-type>
+</thing:thing-descriptions>
