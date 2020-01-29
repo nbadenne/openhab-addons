@@ -100,6 +100,7 @@ public class FreeboxHomeHandler extends BaseThingHandler {
     }
 
     private void getDeviceDataAndUpdateChannels() {
+       
     }
     
 }

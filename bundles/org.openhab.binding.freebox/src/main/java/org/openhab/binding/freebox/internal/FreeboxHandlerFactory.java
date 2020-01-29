@@ -37,6 +37,7 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.freebox.internal.discovery.FreeboxDiscoveryService;
 import org.openhab.binding.freebox.internal.handler.FreeboxDeltaHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxHandler;
+import org.openhab.binding.freebox.internal.handler.FreeboxHomeDoorSensorHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxHomeHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxThingHandler;
 import org.osgi.framework.ServiceRegistration;
@@ -100,6 +101,9 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         } else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_DELTA_SERVER.equals(thingTypeUID)) {
             FreeboxDeltaHandler handler = new FreeboxDeltaHandler(thing);
+            return handler;
+        } else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_HOME_DOOR_SENSOR.equals(thingTypeUID)) {
+            FreeboxHomeDoorSensorHandler handler = new FreeboxHomeDoorSensorHandler(thing);
             return handler;
         }/**
         else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {

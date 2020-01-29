@@ -29,6 +29,9 @@ public class FreeboxPermissions {
     private Boolean parental;
     private Boolean pvr;
     private Boolean tv;
+    private Boolean camera;
+    private Boolean home;
+    private Boolean vm;
 
     public Boolean isSettingsAllowed() {
         return settings;
@@ -60,5 +63,17 @@ public class FreeboxPermissions {
 
     public Boolean istTvAllowed() {
         return tv;
+    }
+
+    public Boolean istCameraAllowed() {
+        return camera;
+    }
+
+    public Boolean istHomeAllowed() {
+        return home;
+    }
+
+    public Boolean istVmAllowed() {
+        return vm;
     }
 }

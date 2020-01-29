@@ -66,6 +66,8 @@ import org.openhab.binding.freebox.internal.api.model.FreeboxLcdConfigResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLoginResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxOpenSessionRequest;
 import org.openhab.binding.freebox.internal.api.model.FreeboxOpenSessionResponse;
+import org.openhab.binding.freebox.internal.api.model.FreeboxOpenSessionResult;
+import org.openhab.binding.freebox.internal.api.model.FreeboxPermissions;
 import org.openhab.binding.freebox.internal.api.model.FreeboxPhoneStatus;
 import org.openhab.binding.freebox.internal.api.model.FreeboxPhoneStatusResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxResponse;
@@ -87,8 +89,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * The {@link FreeboxApiManager} is responsible for the communication with the Freebox.
- * It implements the different HTTP API calls provided by the Freebox
+ * The {@link FreeboxApiManager} is responsible for the communication with the
+ * Freebox. It implements the different HTTP API calls provided by the Freebox
  *
  * @author Laurent Garnier - Initial contribution
  */
@@ -108,6 +110,7 @@ public class FreeboxApiManager {
     private String appToken;
     private String sessionToken;
     private Gson gson;
+    private FreeboxPermissions freeboxPermissions;
 
     public FreeboxApiManager(String appId, String appName, String appVersion, String deviceName) {
         this.appId = appId;
@@ -182,8 +185,11 @@ public class FreeboxApiManager {
         sessionToken = null;
         String challenge = executeGetUrl("login/", FreeboxLoginResponse.class, false).getChallenge();
         FreeboxOpenSessionRequest request = new FreeboxOpenSessionRequest(appId, hmacSha1(appToken, challenge));
-        sessionToken = executePostUrl("login/session/", gson.toJson(request), FreeboxOpenSessionResponse.class, false,
-                false, true).getSessionToken();
+        FreeboxOpenSessionResult freeboxOpenSessionResult = executePostUrl("login/session/", gson.toJson(request),
+                FreeboxOpenSessionResponse.class, false,
+        false, true);
+        freeboxPermissions = freeboxOpenSessionResult.getPermissions();
+        sessionToken = freeboxOpenSessionResult.getSessionToken();
     }
 
     public synchronized void closeSession() {
@@ -519,6 +525,10 @@ public class FreeboxApiManager {
         } catch (IllegalArgumentException | NoSuchAlgorithmException | InvalidKeyException | IllegalStateException e) {
             throw new FreeboxException("Computing the hmac-sha1 of the challenge and the app token failed", e);
         }
+    }
+
+    public FreeboxPermissions getFreeboxPermissions() {
+        return freeboxPermissions;
     }
 
 }

@@ -2,6 +2,8 @@ package org.openhab.binding.freebox.internal.handler;
 
 import static org.openhab.binding.freebox.internal.FreeboxBindingConstants.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +29,8 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.freebox.internal.api.FreeboxApiManager;
 import org.openhab.binding.freebox.internal.api.FreeboxException;
 import org.openhab.binding.freebox.internal.api.model.FreeboxConnectionStatus;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLcdConfig;
 import org.openhab.binding.freebox.internal.api.model.FreeboxSambaConfig;
 import org.openhab.binding.freebox.internal.api.model.FreeboxSystemConfig;
@@ -172,6 +176,10 @@ public class FreeboxDeltaHandler extends BaseThingHandler {
         commOk &= fetchAirMediaConfig();
         commOk &= fetchUPnPAVConfig();
         commOk &= fetchSambaConfig();
+
+        if(freeboxHandler.getApiManager().getFreeboxPermissions().istHomeAllowed()){
+            fetchHomeAdapters();
+        }
         
         if (commOk) {
             updateStatus(ThingStatus.ONLINE);
@@ -180,7 +188,24 @@ public class FreeboxDeltaHandler extends BaseThingHandler {
         }
     }
 
+    private synchronized void fetchHomeAdapters() {
+        try {
+            List<FreeboxHomeNode> devices = apiManager.getHomeNodes();
+            if (devices == null) {
+                devices = new ArrayList<>();
+            }
 
+            // The update of channels is delegated to each thing handler
+            for (Thing thing : freeboxHandler.getThing().getThings()) {
+                ThingHandler handler = thing.getHandler();
+                if (handler instanceof FreeboxHomeDoorSensorHandler) {
+                    ((FreeboxHomeDoorSensorHandler) handler).updateHomeNode(devices);
+                }
+            }
+        } catch (FreeboxException e) {
+            logger.debug("Thing {}: exception in fetchHomeAdapters: {}", getThing().getUID(), e.getMessage(), e);
+        }
+    }
 
 
     private boolean fetchConnectionStatus() {

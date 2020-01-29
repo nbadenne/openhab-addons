@@ -13,10 +13,14 @@
 package org.openhab.binding.freebox.internal.discovery;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
@@ -28,7 +32,12 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
 import org.openhab.binding.freebox.internal.FreeboxBindingConstants;
+import org.openhab.binding.freebox.internal.api.FreeboxException;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
 import org.openhab.binding.freebox.internal.api.model.FreeboxType;
+import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
+import org.openhab.binding.freebox.internal.config.FreeboxHomeNodeConfiguration;
 import org.openhab.binding.freebox.internal.handler.FreeboxHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,6 +123,53 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                 discoveryResult = DiscoveryResultBuilder.create(thingUID).withBridge(bridge).withLabel("Freebox Delta")
                 .build();
                 thingDiscovered(discoveryResult);
+            }
+            if(bridgeHandler.getApiManager().getFreeboxPermissions().istHomeAllowed()){
+                /**
+                List<FreeboxHomeAdapter> freeboxHomeAdapters = new ArrayList<FreeboxHomeAdapter>();
+                try {
+                    freeboxHomeAdapters = bridgeHandler.getApiManager().getHomeAdapters();
+                } catch (FreeboxException e) {
+                    logger.debug(e.getMessage());
+                }
+                for (FreeboxHomeAdapter homeAdapter : freeboxHomeAdapters) {
+                    String name = homeAdapter.getType().getName();
+                    if(StringUtils.isNotEmpty(name)){
+                        String uid = name.replaceAll(":", "_");
+                        thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_HOME_ADAPTER, bridge, uid);
+                        logger.trace("Adding new Freebox Home Adapter {} to inbox", thingUID);
+                        Map<String, Object> properties = new HashMap<>();
+                        properties.put(FreeboxHomeAdapterConfiguration.NAME, homeAdapter.getLabel());
+                        discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
+                                .withBridge(bridge).withLabel(name + " (Home Adapter)").build();
+                        thingDiscovered(discoveryResult);
+                    }
+                }
+                **/
+                List<FreeboxHomeNode> freeboxHomeNodes = new ArrayList<FreeboxHomeNode>();
+                try {
+                    freeboxHomeNodes = bridgeHandler.getApiManager().getHomeNodes();
+                } catch (FreeboxException e) {
+                    logger.debug(e.getMessage());
+                }
+                for (FreeboxHomeNode freeboxHomeNode : freeboxHomeNodes) {
+                    String name = freeboxHomeNode.getName();
+                    logger.debug("Node : "+name);
+                    if(StringUtils.isNotEmpty(name)){
+                        String uid = name.replaceAll(":", "_");
+                        if(freeboxHomeNode.getCategory().equals("dws")){
+                            thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_HOME_DOOR_SENSOR, bridge, uid);
+                        }else 
+                            continue;
+                        logger.trace("Adding new Freebox Home Node {} to inbox", thingUID);
+                        Map<String, Object> properties = new HashMap<>();
+                        properties.put(FreeboxHomeNodeConfiguration.NAME, freeboxHomeNode.getName());
+                        properties.put(FreeboxHomeNodeConfiguration.ID, freeboxHomeNode.getId());
+                        discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
+                                .withBridge(bridge).withLabel(freeboxHomeNode.getLabel() + " (Home Node)").build();
+                        thingDiscovered(discoveryResult);
+                    }
+                }
             }
         
         }
