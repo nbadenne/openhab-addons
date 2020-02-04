@@ -14,6 +14,8 @@ package org.openhab.binding.freebox.internal.api.model;
 
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * The {@link FreeboxLanHost} is the Java class used to map the "LanHost"
  * structure used by the Lan Hosts Browser API
@@ -35,6 +37,8 @@ public class FreeboxLanHost {
     private long lastActivity;
     private List<FreeboxLanHostName> names;
     private List<FreeboxLanHostL3Connectivity> l3connectivities;
+    @SerializedName("interface")
+    private String _interface;
 
     public String getMAC() {
         return (l2ident != null && l2ident.isMacAddress()) ? l2ident.getId() : null;
@@ -91,4 +95,13 @@ public class FreeboxLanHost {
     public List<FreeboxLanHostL3Connectivity> getL3Connectivities() {
         return l3connectivities;
     }
+
+    public String get_interface() {
+        return _interface;
+    }
+
+    public void set_interface(String _interface) {
+        this._interface = _interface;
+    }
+
 }

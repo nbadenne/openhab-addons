@@ -105,6 +105,12 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
         }else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_HOME_ADAPTER.equals(thingTypeUID)) {
             FreeboxHomeAdapterHandler handler = new FreeboxHomeAdapterHandler(thing);
             return handler;
+        }else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_NET_DEVICE.equals(thingTypeUID)) {
+            FreeboxHomeAdapterHandler handler = new FreeboxHomeAdapterHandler(thing);
+            return handler;
+        }else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_NET_INTERFACE.equals(thingTypeUID)) {
+            FreeboxHomeAdapterHandler handler = new FreeboxHomeAdapterHandler(thing);
+            return handler;
         }/**
         else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {
             FreeboxThingHandler handler = new FreeboxThingHandler(thing);

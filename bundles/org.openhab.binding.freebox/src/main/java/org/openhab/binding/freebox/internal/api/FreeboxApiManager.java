@@ -342,7 +342,7 @@ public class FreeboxApiManager {
         return executeGetUrl("lan/browser/" + encodeUrl(lanInterface) + "/", FreeboxLanHostsResponse.class);
     }
 
-    private FreeboxLanHost getLanHostsFromInterface(String lanInterface, String id) throws FreeboxException {
+    public FreeboxLanHost getLanHostsFromInterface(String lanInterface, String id) throws FreeboxException {
         return executeGetUrl("lan/browser/" + encodeUrl(lanInterface) + "/"+id, FreeboxLanHostResponse.class);
     }
 

@@ -22,7 +22,13 @@ package org.openhab.binding.freebox.internal.config;
 public class FreeboxNetInterfaceConfiguration {
 
     public static final String IP_ADDRESS = "ipAddress";
+    public static final String ID = "id";
+    public static final String INTERFACE = "_interface";
+    public static final String REFRESH_INTERVAL = "refreshInterval";
 
     public String ipAddress;
+    public String id;
+    public String _interface;
+    public Integer refreshInterval; 
 
 }

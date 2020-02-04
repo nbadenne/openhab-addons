@@ -22,7 +22,13 @@ package org.openhab.binding.freebox.internal.config;
 public class FreeboxNetDeviceConfiguration {
 
     public static final String MAC_ADDRESS = "macAddress";
+    public static final String ID = "id";
+    public static final String INTERFACE = "_interface";
+    public static final String REFRESH_INTERVAL = "refreshInterval";
 
     public String macAddress;
+    public String id;
+    public String _interface;
+    public Integer refreshInterval; 
 
 }
