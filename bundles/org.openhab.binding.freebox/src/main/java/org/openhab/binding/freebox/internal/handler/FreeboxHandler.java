@@ -273,46 +273,6 @@ public class FreeboxHandler extends BaseBridgeHandler {
         }
     }
 
-    private synchronized void fetchHomeAdapters() {
-        try {
-            List<FreeboxHomeAdapter> devices = apiManager.getHomeAdapters();
-            if (devices == null) {
-                devices = new ArrayList<>();
-            }
-
-            // The update of channels is delegated to each thing handler
-            for (Thing thing : getThing().getThings()) {
-                ThingHandler handler = thing.getHandler();
-                if (handler instanceof FreeboxThingHandler) {
-                    ((FreeboxThingHandler) handler).updateHomeAdapters(devices);
-                }
-            }
-        } catch (FreeboxException e) {
-            logger.debug("Thing {}: exception in fetchHomeAdapters: {}", getThing().getUID(), e.getMessage(), e);
-        }
-    }
-
-    private synchronized void fetchHomeNodes() {
-        try {
-            List<FreeboxHomeNode> devices = apiManager.getHomeNodes();
-            if (devices == null) {
-                devices = new ArrayList<>();
-            }
-
-            // The update of channels is delegated to each thing handler
-            for (Thing thing : getThing().getThings()) {
-                ThingHandler handler = thing.getHandler();
-                if (handler instanceof FreeboxThingHandler) {
-                    ((FreeboxThingHandler) handler).updateHomeNode(devices);
-                }
-            }
-        } catch (FreeboxException e) {
-            logger.debug("Thing {}: exception in fetchHomeAdapters: {}", getThing().getUID(), e.getMessage(), e);
-        }
-    }
-
-
-
     public void logCommandException(FreeboxException e, ChannelUID channelUID, Command command) {
         if (e.isMissingRights()) {
             logger.debug("Thing {}: missing right {} while handling command {} from channel {}", getThing().getUID(),

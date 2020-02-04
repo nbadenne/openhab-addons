@@ -51,6 +51,7 @@ import org.openhab.binding.freebox.internal.api.model.FreeboxFtpConfig;
 import org.openhab.binding.freebox.internal.api.model.FreeboxFtpConfigResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapterResponse;
+import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdaptersResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeEndpoint;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeEndpointResponse;
@@ -58,6 +59,7 @@ import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodesResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanConfigResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
+import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostsResponse;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanInterface;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanInterfacesResponse;
@@ -340,6 +342,10 @@ public class FreeboxApiManager {
         return executeGetUrl("lan/browser/" + encodeUrl(lanInterface) + "/", FreeboxLanHostsResponse.class);
     }
 
+    private FreeboxLanHost getLanHostsFromInterface(String lanInterface, String id) throws FreeboxException {
+        return executeGetUrl("lan/browser/" + encodeUrl(lanInterface) + "/"+id, FreeboxLanHostResponse.class);
+    }
+
     public FreeboxPhoneStatus getPhoneStatus() throws FreeboxException {
         // This API is undocumented but working
         // It is extracted from the freeboxos-java library
@@ -368,14 +374,18 @@ public class FreeboxApiManager {
     }
 
     public List<FreeboxHomeAdapter> getHomeAdapters() throws FreeboxException {
-        return executeGetUrl("home/adapters", FreeboxHomeAdapterResponse.class, true, false, true);
+        return executeGetUrl("home/adapters", FreeboxHomeAdaptersResponse.class, true, false, true);
+    }
+
+    public FreeboxHomeAdapter getHomeAdapter(int id) throws FreeboxException {
+        return executeGetUrl("home/adapters/"+id, FreeboxHomeAdapterResponse.class, true, false, true);
     }
 
     public List<FreeboxHomeNode> getHomeNodes() throws FreeboxException {
         return executeGetUrl("home/nodes", FreeboxHomeNodesResponse.class, true, false, true);
    }
 
-    public FreeboxHomeNode getHomeNodeStatus(int id) throws FreeboxException {
+    public FreeboxHomeNode getHomeNode(int id) throws FreeboxException {
          return executeGetUrl("home/nodes/"+id, FreeboxHomeNodeResponse.class, true, false, true);
     }
 

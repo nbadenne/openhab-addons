@@ -372,31 +372,7 @@ public class FreeboxThingHandler extends BaseThingHandler {
         }
     }
 
-    public void updateHomeAdapters(List<FreeboxHomeAdapter> homeAdapters) {
-        if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_ADAPTER)) {
-            return;
-        }
-
-        String name = getThing().getProperties().get("name");
-        boolean found = false;
-        boolean active = false;
-        if (homeAdapters != null) {
-            for (FreeboxHomeAdapter homeAdapter : homeAdapters) {
-                if (name.equals(homeAdapter.getLabel())) {
-                    found = true;
-                    if (homeAdapter.getStatus().equals("active")) {
-                        active = true;
-                    }
-                    break;
-                }
-            }
-        }
-        if (!found) {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home adapter not found");
-        } else {
-            updateState(new ChannelUID(getThing().getUID(), ADAPTER_ACTIVE), active ? OnOffType.ON : OnOffType.OFF);
-        }
-    }
+    
 
     public void updateHomeNode(List<FreeboxHomeNode> freeboxHomeNodes) {
         if (!getThing().getThingTypeUID().equals(FREEBOX_THING_TYPE_HOME_DOOR_SENSOR)) {

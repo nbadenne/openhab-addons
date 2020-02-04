@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.freebox.internal.FreeboxBindingConstants;
 import org.openhab.binding.freebox.internal.api.FreeboxApiManager;
 import org.openhab.binding.freebox.internal.api.FreeboxException;
-import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNodeEndpoint;
 import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
@@ -34,7 +33,7 @@ public class FreeboxHomeDoorSensorHandler extends BaseThingHandler {
 
     private FreeboxHandler freeboxHandler;
 
-    private ScheduledFuture<?> refreshTask;
+    private ScheduledFuture<?> refreshTask, refreshDoor;
 
     private FreeboxHomeAdapterConfiguration config;
 
@@ -55,6 +54,10 @@ public class FreeboxHomeDoorSensorHandler extends BaseThingHandler {
         if (refreshTask != null) {
             refreshTask.cancel(true);
             refreshTask = null;
+        }
+        if (refreshDoor != null) {
+            refreshDoor.cancel(true);
+            refreshDoor = null;
         }
         freeboxHandler = null;
     }
@@ -103,7 +106,10 @@ public class FreeboxHomeDoorSensorHandler extends BaseThingHandler {
 
     private void startAutomaticRefresh() {
         if (refreshTask == null || refreshTask.isCancelled()) {
-            refreshTask = scheduler.scheduleWithFixedDelay(this::updateHomeDoorSensor, 1, getConfigAs(FreeboxHomeNodeConfiguration.class).refreshInterval, TimeUnit.SECONDS);
+            refreshTask = scheduler.scheduleWithFixedDelay(this::updateHomeNode, 1, getConfigAs(FreeboxHomeNodeConfiguration.class).refreshInterval, TimeUnit.SECONDS);
+        }
+        if (refreshDoor == null || refreshDoor.isCancelled()) {
+            refreshDoor = scheduler.scheduleWithFixedDelay(this::updateHomeDoorSensor, 1, 2, TimeUnit.SECONDS);
         }
     }
 
@@ -128,26 +134,20 @@ public class FreeboxHomeDoorSensorHandler extends BaseThingHandler {
         }
     }
 
-    public void updateHomeNode(List<FreeboxHomeNode> freeboxHomeNodes) {
-        String name = getThing().getProperties().get("name");
-        boolean found = false;
-        boolean active = false;
-        if (freeboxHomeNodes != null) {
-            for (FreeboxHomeNode homeNode : freeboxHomeNodes) {
-                if (name.equals(homeNode.getName())) {
-                    found = true;
-                    if (homeNode.getStatus().equals("active")) {
-                        active = true;
-                    }
-                    break;
-                }
-            }
-        }
+    public void updateHomeNode() {
+        int id = (int) Double.parseDouble(getThing().getProperties().get("id"));
 
-        if (!found) {
+        FreeboxHomeNode freeboxHomeNode = null;
+        try{
+            freeboxHomeNode = freeboxHandler.getApiManager().getHomeNode(id);
+        }catch(FreeboxException e){
+            logger.error("updateHomeNode error: {}", e.getLocalizedMessage());
+        }
+        
+        if (freeboxHomeNode == null){
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Home node not found");
         } else {
-            updateState(new ChannelUID(getThing().getUID(), FreeboxBindingConstants.NODE_ACTIVE), active ? OnOffType.ON : OnOffType.OFF);
+            updateState(new ChannelUID(getThing().getUID(), FreeboxBindingConstants.NODE_ACTIVE), freeboxHomeNode.getStatus().equals("active") ? OnOffType.ON : OnOffType.OFF);
         }
     }
     

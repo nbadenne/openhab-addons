@@ -176,11 +176,6 @@ public class FreeboxDeltaHandler extends BaseThingHandler {
         commOk &= fetchAirMediaConfig();
         commOk &= fetchUPnPAVConfig();
         commOk &= fetchSambaConfig();
-
-        if(freeboxHandler.getApiManager().getFreeboxPermissions().istHomeAllowed()){
-            fetchHomeAdapters();
-        }
-        
         if (commOk) {
             updateStatus(ThingStatus.ONLINE);
         } else {
@@ -188,24 +183,7 @@ public class FreeboxDeltaHandler extends BaseThingHandler {
         }
     }
 
-    private synchronized void fetchHomeAdapters() {
-        try {
-            List<FreeboxHomeNode> devices = apiManager.getHomeNodes();
-            if (devices == null) {
-                devices = new ArrayList<>();
-            }
-
-            // The update of channels is delegated to each thing handler
-            for (Thing thing : freeboxHandler.getThing().getThings()) {
-                ThingHandler handler = thing.getHandler();
-                if (handler instanceof FreeboxHomeDoorSensorHandler) {
-                    ((FreeboxHomeDoorSensorHandler) handler).updateHomeNode(devices);
-                }
-            }
-        } catch (FreeboxException e) {
-            logger.debug("Thing {}: exception in fetchHomeAdapters: {}", getThing().getUID(), e.getMessage(), e);
-        }
-    }
+    
 
 
     private boolean fetchConnectionStatus() {

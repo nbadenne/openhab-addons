@@ -125,7 +125,6 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                 thingDiscovered(discoveryResult);
             }
             if(bridgeHandler.getApiManager().getFreeboxPermissions().istHomeAllowed()){
-                /**
                 List<FreeboxHomeAdapter> freeboxHomeAdapters = new ArrayList<FreeboxHomeAdapter>();
                 try {
                     freeboxHomeAdapters = bridgeHandler.getApiManager().getHomeAdapters();
@@ -140,12 +139,12 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                         logger.trace("Adding new Freebox Home Adapter {} to inbox", thingUID);
                         Map<String, Object> properties = new HashMap<>();
                         properties.put(FreeboxHomeAdapterConfiguration.NAME, homeAdapter.getLabel());
+                        properties.put(FreeboxHomeNodeConfiguration.ID, homeAdapter.getId());
                         discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
                                 .withBridge(bridge).withLabel(name + " (Home Adapter)").build();
                         thingDiscovered(discoveryResult);
                     }
                 }
-                **/
                 List<FreeboxHomeNode> freeboxHomeNodes = new ArrayList<FreeboxHomeNode>();
                 try {
                     freeboxHomeNodes = bridgeHandler.getApiManager().getHomeNodes();
