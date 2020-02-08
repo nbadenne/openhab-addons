@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class FreeboxNetDeviceHandler extends BaseThingHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(FreeboxHomeDoorSensorHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(FreeboxNetDeviceHandler.class);
 
     private FreeboxHandler freeboxHandler;
 

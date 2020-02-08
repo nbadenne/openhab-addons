@@ -357,6 +357,10 @@ public class FreeboxApiManager {
         return executeGetUrl("call/log/", FreeboxCallEntryResponse.class);
     }
 
+    public List<FreeboxCallEntry> getCallEntriesByType(String type) throws FreeboxException {
+        return executeGetUrl("call/log/"+type, FreeboxCallEntryResponse.class);
+    }
+
     public List<FreeboxAirMediaReceiver> getAirMediaReceivers() throws FreeboxException {
         return executeGetUrl("airmedia/receivers/", FreeboxAirMediaReceiversResponse.class, true, true, false);
     }

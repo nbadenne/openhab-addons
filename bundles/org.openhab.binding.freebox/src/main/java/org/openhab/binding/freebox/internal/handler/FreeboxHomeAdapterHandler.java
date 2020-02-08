@@ -59,7 +59,6 @@ public class FreeboxHomeAdapterHandler extends BaseThingHandler {
         Bridge bridge = getBridge();
         if (bridge == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Bridge Not set");
-            startAutomaticRefresh();
             return;
         }
 
@@ -92,6 +91,8 @@ public class FreeboxHomeAdapterHandler extends BaseThingHandler {
 
             if (bridgeStatus == ThingStatus.ONLINE) {
                 updateStatus(ThingStatus.ONLINE);
+                startAutomaticRefresh();
+
             } else {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
             }

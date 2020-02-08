@@ -39,6 +39,7 @@ import org.openhab.binding.freebox.internal.handler.FreeboxDeltaHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxHomeAdapterHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxHomeDoorSensorHandler;
+import org.openhab.binding.freebox.internal.handler.FreeboxPhoneHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxThingHandler;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -110,6 +111,9 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         }else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_NET_INTERFACE.equals(thingTypeUID)) {
             FreeboxHomeAdapterHandler handler = new FreeboxHomeAdapterHandler(thing);
+            return handler;
+        }else if (FreeboxBindingConstants.FREEBOX_THING_TYPE_PHONE.equals(thingTypeUID)) {
+            FreeboxPhoneHandler handler = new FreeboxPhoneHandler(thing);
             return handler;
         }/**
         else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {

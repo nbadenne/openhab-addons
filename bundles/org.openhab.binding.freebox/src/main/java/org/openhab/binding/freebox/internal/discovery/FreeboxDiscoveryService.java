@@ -129,7 +129,7 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                 .build();
                 thingDiscovered(discoveryResult);
             }
-            if(bridgeHandler.getApiManager().getFreeboxPermissions().istHomeAllowed()){
+            if(bridgeHandler.getApiManager().getFreeboxPermissions().isHomeAllowed()){
                 List<FreeboxHomeAdapter> freeboxHomeAdapters = new ArrayList<FreeboxHomeAdapter>();
                 try {
                     freeboxHomeAdapters = bridgeHandler.getApiManager().getHomeAdapters();
@@ -175,58 +175,64 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                     }
                 }
             }
-            if(bridgeHandler.getApiManager().getFreeboxPermissions().istHomeAllowed()){
-                List<FreeboxLanHost> lanHosts = new ArrayList<FreeboxLanHost>();
-                try {
-                    lanHosts = bridgeHandler.getApiManager().getLanHosts();
-                } catch (FreeboxException e) {
-                    logger.debug(e.getMessage());
-                }
-                for (FreeboxLanHost host : lanHosts) {
-                    String mac = host.getMAC();
-                    if (StringUtils.isNotEmpty(mac)) {
-                        if (discoverNetDevice) {
-                            String uid = mac.replaceAll("[^A-Za-z0-9_]", "_");
-                            thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_NET_DEVICE, bridge, uid);
-                            String name = StringUtils.isEmpty(host.getPrimaryName()) ? ("Freebox Network Device " + mac)
-                                    : host.getPrimaryName();
-                            logger.trace("Adding new Freebox Network Device {} to inbox", thingUID);
-                            Map<String, Object> properties = new HashMap<>(1);
-                            if (StringUtils.isNotEmpty(host.getVendorName())) {
-                                properties.put(Thing.PROPERTY_VENDOR, host.getVendorName());
-                            }
-                            properties.put(FreeboxNetDeviceConfiguration.ID, host.getId());
-                            properties.put(FreeboxNetDeviceConfiguration.INTERFACE, host.get_interface());
-                            properties.put(FreeboxNetDeviceConfiguration.MAC_ADDRESS, mac);
-                            discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
-                                    .withBridge(bridge).withLabel(name).build();
-                            thingDiscovered(discoveryResult);
+            if(bridgeHandler.getApiManager().getFreeboxPermissions().isCallsAllowed()){
+                // Phone
+                thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_PHONE, bridge, PHONE_ID);
+                logger.trace("Adding new Freebox Phone {} to inbox", thingUID);
+                discoveryResult = DiscoveryResultBuilder.create(thingUID).withBridge(bridge).withLabel("Wired phone")
+                        .build();
+                thingDiscovered(discoveryResult);
+            }
+            List<FreeboxLanHost> lanHosts = new ArrayList<FreeboxLanHost>();
+            try {
+                lanHosts = bridgeHandler.getApiManager().getLanHosts();
+            } catch (FreeboxException e) {
+                logger.debug(e.getMessage());
+            }
+            for (FreeboxLanHost host : lanHosts) {
+                String mac = host.getMAC();
+                if (StringUtils.isNotEmpty(mac)) {
+                    if (discoverNetDevice) {
+                        String uid = mac.replaceAll("[^A-Za-z0-9_]", "_");
+                        thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_NET_DEVICE, bridge, uid);
+                        String name = StringUtils.isEmpty(host.getPrimaryName()) ? ("Freebox Network Device " + mac)
+                                : host.getPrimaryName();
+                        logger.trace("Adding new Freebox Network Device {} to inbox", thingUID);
+                        Map<String, Object> properties = new HashMap<>(1);
+                        if (StringUtils.isNotEmpty(host.getVendorName())) {
+                            properties.put(Thing.PROPERTY_VENDOR, host.getVendorName());
                         }
-    
-                        // Network interfaces
-                        if (host.getL3Connectivities() != null && discoverNetInterface) {
-                            for (FreeboxLanHostL3Connectivity l3 : host.getL3Connectivities()) {
-                                String addr = l3.getAddr();
-                                if (StringUtils.isNotEmpty(addr)) {
-                                    String uid = addr.replaceAll("[^A-Za-z0-9_]", "_");
-                                    thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_NET_INTERFACE,
-                                            bridge, uid);
-                                    String name = addr;
-                                    if (StringUtils.isNotEmpty(host.getPrimaryName())) {
-                                        name += " (" + (host.getPrimaryName() + ")");
-                                    }
-                                    logger.trace("Adding new Freebox Network Interface {} to inbox", thingUID);
-                                    Map<String, Object> properties = new HashMap<>(1);
-                                    if (StringUtils.isNotEmpty(host.getVendorName())) {
-                                        properties.put(Thing.PROPERTY_VENDOR, host.getVendorName());
-                                    }
-                                    properties.put(FreeboxNetInterfaceConfiguration.ID, host.getId());
-                                    properties.put(FreeboxNetInterfaceConfiguration.INTERFACE, host.get_interface());
-                                    properties.put(FreeboxNetInterfaceConfiguration.IP_ADDRESS, addr);
-                                    discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
-                                            .withBridge(bridge).withLabel(name).build();
-                                    thingDiscovered(discoveryResult);
+                        properties.put(FreeboxNetDeviceConfiguration.ID, host.getId());
+                        properties.put(FreeboxNetDeviceConfiguration.INTERFACE, host.get_interface());
+                        properties.put(FreeboxNetDeviceConfiguration.MAC_ADDRESS, mac);
+                        discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
+                                .withBridge(bridge).withLabel(name).build();
+                        thingDiscovered(discoveryResult);
+                    }
+
+                    // Network interfaces
+                    if (host.getL3Connectivities() != null && discoverNetInterface) {
+                        for (FreeboxLanHostL3Connectivity l3 : host.getL3Connectivities()) {
+                            String addr = l3.getAddr();
+                            if (StringUtils.isNotEmpty(addr)) {
+                                String uid = addr.replaceAll("[^A-Za-z0-9_]", "_");
+                                thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_NET_INTERFACE,
+                                        bridge, uid);
+                                String name = addr;
+                                if (StringUtils.isNotEmpty(host.getPrimaryName())) {
+                                    name += " (" + (host.getPrimaryName() + ")");
                                 }
+                                logger.trace("Adding new Freebox Network Interface {} to inbox", thingUID);
+                                Map<String, Object> properties = new HashMap<>(1);
+                                if (StringUtils.isNotEmpty(host.getVendorName())) {
+                                    properties.put(Thing.PROPERTY_VENDOR, host.getVendorName());
+                                }
+                                properties.put(FreeboxNetInterfaceConfiguration.ID, host.getId());
+                                properties.put(FreeboxNetInterfaceConfiguration.INTERFACE, host.get_interface());
+                                properties.put(FreeboxNetInterfaceConfiguration.IP_ADDRESS, addr);
+                                discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
+                                        .withBridge(bridge).withLabel(name).build();
+                                thingDiscovered(discoveryResult);
                             }
                         }
                     }

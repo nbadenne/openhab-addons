@@ -61,19 +61,19 @@ public class FreeboxPermissions {
         return pvr;
     }
 
-    public Boolean istTvAllowed() {
+    public Boolean isTvAllowed() {
         return tv;
     }
 
-    public Boolean istCameraAllowed() {
+    public Boolean isCameraAllowed() {
         return camera;
     }
 
-    public Boolean istHomeAllowed() {
+    public Boolean isHomeAllowed() {
         return home;
     }
 
-    public Boolean istVmAllowed() {
+    public Boolean isVmAllowed() {
         return vm;
     }
 }
