@@ -34,11 +34,13 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
 import org.openhab.binding.freebox.internal.FreeboxBindingConstants;
 import org.openhab.binding.freebox.internal.api.FreeboxException;
+import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeAdapter;
 import org.openhab.binding.freebox.internal.api.model.FreeboxHomeNode;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHost;
 import org.openhab.binding.freebox.internal.api.model.FreeboxLanHostL3Connectivity;
 import org.openhab.binding.freebox.internal.api.model.FreeboxType;
+import org.openhab.binding.freebox.internal.config.FreeboxAirPlayDeviceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxHomeAdapterConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxHomeNodeConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxNetDeviceConfiguration;
@@ -183,6 +185,33 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                         .build();
                 thingDiscovered(discoveryResult);
             }
+            //Air Media
+            List<FreeboxAirMediaReceiver> airPlayDevices = new ArrayList<FreeboxAirMediaReceiver>();
+            try {
+                airPlayDevices = bridgeHandler.getApiManager().getAirMediaReceivers();
+            } catch (FreeboxException e) {
+                logger.debug(e.getMessage());
+            }
+            for (FreeboxAirMediaReceiver device : airPlayDevices) {
+                String name = device.getName();
+                boolean videoCapable = device.isVideoCapable();
+                logger.debug("AirPlay Device name {} video capable {}", name, videoCapable);
+                // The Freebox API allows pushing media only to receivers with photo or video capabilities
+                // but not to receivers with only audio capability; so receivers without video capability
+                // are ignored by the discovery
+                if (StringUtils.isNotEmpty(name) && videoCapable) {
+                    String uid = name.replaceAll("[^A-Za-z0-9_]", "_");
+                    thingUID = new ThingUID(FreeboxBindingConstants.FREEBOX_THING_TYPE_AIRPLAY, bridge, uid);
+                    logger.trace("Adding new Freebox AirPlay Device {} to inbox", thingUID);
+                    Map<String, Object> properties = new HashMap<>(1);
+                    properties.put(FreeboxAirPlayDeviceConfiguration.NAME, name);
+                    discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
+                            .withBridge(bridge).withLabel(name + " (AirPlay)").build();
+                    thingDiscovered(discoveryResult);
+                }
+            }
+            
+            //Host
             List<FreeboxLanHost> lanHosts = new ArrayList<FreeboxLanHost>();
             try {
                 lanHosts = bridgeHandler.getApiManager().getLanHosts();
@@ -211,7 +240,7 @@ public class FreeboxDiscoveryService extends AbstractDiscoveryService implements
                     }
 
                     // Network interfaces
-                    if (host.getL3Connectivities() != null && discoverNetInterface) {
+                    if (host.getL3Connectivities() != null) {
                         for (FreeboxLanHostL3Connectivity l3 : host.getL3Connectivities()) {
                             String addr = l3.getAddr();
                             if (StringUtils.isNotEmpty(addr)) {
